@@ -1,5 +1,5 @@
-# Wavebook Smart Contract
+# CheckInPortal Smart Contract
 
 Deployment address:
 
-https://goerli.etherscan.io/address/0x23B45B86B1A58029f7c479E033044D9BF85A9E93
+https://goerli.etherscan.io/address/0x8fD336a831460b8F8b62F2B1E54073DA12f178d2

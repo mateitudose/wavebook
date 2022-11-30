@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/wavebook.iml" filepath="$PROJECT_DIR$/.idea/wavebook.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../checkinportal/.idea/checkinportal.iml" filepath="$PROJECT_DIR$/../checkinportal/.idea/checkinportal.iml" />
     </modules>
   </component>
 </project>
