@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import abi from "./utils/CheckInPortal.json"
+import {ethers} from "ethers";
 import "./App.css";
 
 const getEthereumObject = () => window.ethereum;
@@ -38,7 +40,8 @@ const findMetaMaskAccount = async () => {
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
-  const contractAddress = ""
+  const contractAddress = "0x8fD336a831460b8F8b62F2B1E54073DA12f178d2";
+  const contractABI = abi.abi;
 
   const connectWallet = async () => {
     try {
@@ -69,19 +72,19 @@ const App = () => {
         const checkInPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
 
         let count = await checkInPortalContract.getTotalCheckIns();
-        console.log("Retrieved total wave count...", count.toNumber());
+        console.log("Retrieved total check-ins count...", count.toNumber());
 
         /*
         * Execute the actual wave from your smart contract
         */
-        const waveTxn = await wavePortalContract.wave();
+        const waveTxn = await checkInPortalContract.checkIn();
         console.log("Mining...", waveTxn.hash);
 
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
 
-        count = await wavePortalContract.getTotalWaves();
-        console.log("Retrieved total wave count...", count.toNumber());
+        count = await checkInPortalContract.getTotalCheckIns();
+        console.log("Retrieved total check-ins count...", count.toNumber());
       } else {
         console.log("Ethereum object doesn't exist!");
       }
@@ -115,7 +118,7 @@ const App = () => {
             This is Wavebook, a place where people check-in using their Ethereum wallets (Metamask, Enkrypt)
           </div>
 
-          <button className="waveButton" onClick={null}>
+          <button className="waveButton" onClick={checkIn}>
             Check-in
           </button>
 
