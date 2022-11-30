@@ -111,11 +111,11 @@ const App = () => {
       <div className="mainContainer">
         <div className="dataContainer">
           <div className="header">
-            👋 Hey there!
+            🔒 Hey there!
           </div>
 
           <div className="bio">
-            This is Wavebook, a place where people check-in using their Ethereum wallets (Metamask, Enkrypt)
+            This is Check-in Portal, a place where people check-in using their Ethereum wallets (Metamask, Enkrypt)
           </div>
 
           <button className="waveButton" onClick={checkIn}>
