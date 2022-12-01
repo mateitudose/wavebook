@@ -5,17 +5,9 @@ import "./App.css";
 
 const getEthereumObject = () => window.ethereum;
 
-/*
- * This function returns the first linked account found.
- * If there is no account linked, it will return null.
- */
 const findMetaMaskAccount = async () => {
   try {
     const ethereum = getEthereumObject();
-
-    /*
-     * First make sure we have access to the Ethereum object.
-     */
     if (!ethereum) {
       console.error("Make sure you have Metamask!");
       return null;
@@ -40,8 +32,62 @@ const findMetaMaskAccount = async () => {
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
-  const contractAddress = "0x8fD336a831460b8F8b62F2B1E54073DA12f178d2";
+  const [checkInsList, setCheckInsList] = useState([]);
+  const contractAddress = "0x54F2c5B40Cb4B273479ca2DA0dC0874b40b5ED16";
   const contractABI = abi.abi;
+
+  const getAllCheckIns = async () => {
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const checkInPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+        const checkIns = await checkInPortalContract.getCheckInsList();
+        let processedCheckIns = [];
+        checkIns.forEach(checkIn => {
+          processedCheckIns.push({
+            address: checkIn.person,
+            timestamp: new Date(checkIn.timestamp * 1000)
+          });
+        });
+        setCheckInsList(processedCheckIns);
+      } else {
+        console.log("Ethereum object doesn't exist!")
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    let checkInPortalContract;
+
+    const onNewCheckIn = (from, timestamp) => {
+      console.log("New Check-in:", from, timestamp);
+      setCheckInsList(prevState => [
+        ...prevState,
+        {
+          address: from,
+          timestamp: new Date(timestamp * 1000)
+        },
+      ]);
+    };
+
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      checkInPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+      checkInPortalContract.on("NewCheckIn", onNewCheckIn);
+    }
+
+    return () => {
+      if (checkInPortalContract) {
+        checkInPortalContract.off("NewCheckIn", onNewCheckIn);
+      }
+    };
+  }, []);
 
   const connectWallet = async () => {
     try {
@@ -73,11 +119,7 @@ const App = () => {
 
         let count = await checkInPortalContract.getTotalCheckIns();
         console.log("Retrieved total check-ins count...", count.toNumber());
-
-        /*
-        * Execute the actual wave from your smart contract
-        */
-        const waveTxn = await checkInPortalContract.checkIn();
+        const waveTxn = await checkInPortalContract.checkIn({gasLimit:300000});
         console.log("Mining...", waveTxn.hash);
 
         await waveTxn.wait();
@@ -93,17 +135,15 @@ const App = () => {
     }
   }
 
-  /*
-   * This runs our function when the page loads.
-   * More technically, when the App component "mounts".
-   */
   useEffect(() => {
     async function verifyIfAuthorized(){
       return await findMetaMaskAccount();
     }
     verifyIfAuthorized().then(account => {
-      if (account != null)
-        setCurrentAccount(account)
+      if (account != null) {
+        setCurrentAccount(account);
+        getAllCheckIns();
+      }
     })
   }, []);
 
@@ -113,23 +153,24 @@ const App = () => {
           <div className="header">
             🔒 Hey there!
           </div>
-
           <div className="bio">
             This is Check-in Portal, a place where people check-in using their Ethereum wallets (Metamask, Enkrypt)
           </div>
-
           <button className="waveButton" onClick={checkIn}>
             Check-in
           </button>
-
-          {/*
-         * If there is no currentAccount render this button
-         */}
           {!currentAccount && (
               <button className="waveButton" onClick={connectWallet}>
                 Connect Wallet
               </button>
           )}
+          {checkInsList.map((checkIn, index) => {
+            return (
+                <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
+                  <div>Address: {checkIn.address}</div>
+                  <div>Time: {checkIn.timestamp.toString()}</div>
+                </div>)
+          })}
         </div>
       </div>
   );

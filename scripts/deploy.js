@@ -6,10 +6,12 @@ const main = async () => {
     console.log("Account balance: ", accountBalance.toString());
 
     const checkInContractFactory = await hre.ethers.getContractFactory("CheckInPortal");
-    const checkInContract = await checkInContractFactory.deploy();
+    const checkInContract = await checkInContractFactory.deploy({
+        value: hre.ethers.utils.parseEther("0.001"),
+    });
     await checkInContract.deployed();
 
-    console.log("WavePortal address: ", checkInContract.address);
+    console.log("Check-in Portal address: ", checkInContract.address);
 };
 
 const runMain = async () => {
